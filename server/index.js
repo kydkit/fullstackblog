@@ -43,8 +43,10 @@ app.get(prefix + "/blogs/:id", async(req, res) => {
   res.json(blog); 
 } )
 
+//POST add to database
+//First part of POST request is to add info to the db
 app.post(prefix + "/blogs", async(req, res) => {
-  console.log("body: ", req.body);
+  // console.log("body: ", req.body);
   //destructuring to define what is req.body
   let { author, title, created, content } = req.body;
   let query = /*sql*/`
@@ -58,6 +60,18 @@ app.post(prefix + "/blogs", async(req, res) => {
     $created: created,
     $content: content
   }
-  let newPost = await db.run(query, params); 
+
+  //SECOND PART OF POST request is to GET back info in order to display 
+  let result = await db.run(query, params); 
+  query = `SELECT * FROM blogs WHERE id = $id`
+  //lastID info can be found when console logging  result variable
+  params = {$id: result.lastID}; 
+  let newPost = await db.get(query, params); 
   res.json(newPost);
 }) 
+
+//run() is used when we want to make changes to the db, it can be a POST, PUT or DELETE
+//PUT edit info in db
+// app.put(prefix + "/blogs/:id", async(req, res)=> {
+
+// })
