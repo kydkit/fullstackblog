@@ -21,6 +21,43 @@ app.listen(3001, (err) => {
 
 app.get(prefix + "/blogs", async(req, res) => {
   let query = /*sql*/ `SELECT * FROM blogs`; 
+  //.all takes everything from the databsase
   let blogs = await db.all(query); 
   res.json(blogs); 
 })
+
+app.get(prefix + "/blogs/:id", async(req, res) => {
+  //req.params = paramenter behind /blogs/
+  // console.log(req.params);
+  //$ in front means value
+  let query = /*sql*/ `SELECT * FROM blogs WHERE id = $id`; 
+  
+  //different ways to define id as variable
+  //let id = req.params.id
+  //let {id} = req.params;
+  //params is used to define value in query above
+  let params = {$id: req.params.id}; 
+  
+  //get() gives us the first match in the db
+  let blog = await db.get(query, params); 
+  res.json(blog); 
+} )
+
+app.post(prefix + "/blogs", async(req, res) => {
+  console.log("body: ", req.body);
+  //destructuring to define what is req.body
+  let { author, title, created, content } = req.body;
+  let query = /*sql*/`
+    INSERT INTO blogs (author, title, created, content)
+    VALUES ($author, $title, $created, $content)
+  `; 
+  //params used to define value in query above
+  let params = {
+    $author: author, 
+    $title: title, 
+    $created: created,
+    $content: content
+  }
+  let newPost = await db.run(query, params); 
+  res.json(newPost);
+}) 
