@@ -103,6 +103,15 @@ app.put(prefix + "/blogs/:id", async (req, res) => {
 
 //DELETE from db
 app.delete(prefix + "/blogs/:id", async (req, res) => {
+  let blog = await db.get(/*sql*/`SELECT * FROM blogs WHERE id = $id`, {
+    $id: req.params.id, 
+  }); 
+  if(!blog){
+    res
+      .status(400)
+      .send("The blog does not exist"); 
+    return;
+  }
   let query = `DELETE FROM blogs WHERE id = $id`;
   let params = {$id: req.params.id};
   let deletedPost = await db.run(query, params);
