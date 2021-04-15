@@ -60,9 +60,9 @@ app.post(prefix + "/blogs", async (req, res) => {
     $created: created,
     $content: content,
   };
+  let result = await db.run(query, params);
 
   //SECOND PART OF POST request is to GET back info in order to display
-  let result = await db.run(query, params);
   query = `SELECT * FROM blogs WHERE id = $id`;
   //lastID info can be found when console logging  result variable
   params = { $id: result.lastID };
@@ -72,9 +72,7 @@ app.post(prefix + "/blogs", async (req, res) => {
 
 //run() is used when we want to make changes to the db, it can be a POST, PUT or DELETE
 //PUT edit info in db
-//  UPDATE blogs
-//  SET author = $author, title = $title ...
-//  WHERE condition;
+
 app.put(prefix + "/blogs/:id", async (req, res) => {
   console.log(req.body);
   let query = `
@@ -83,16 +81,30 @@ app.put(prefix + "/blogs/:id", async (req, res) => {
       .map((k) => k + " = " + "$" + k)
       .join(", ")}
     WHERE id = $id`;
-  let params = {$id: req.params.id}; 
+  //  UPDATE blogs
+  //  SET author = $author, title = $title ...
+  //  WHERE condition;
+  let params = { $id: req.params.id };
   //  for/in loop loops thru the properties of an Object
   for (key in req.body) {
-    params["$" + key] = req.body[key]; 
+    params["$" + key] = req.body[key];
   }
   // $author: author,
   // $title: title,
   // $created: created,
   // $content: content
-  
-  let editPost = await db.get(query, params)
-  res.json(editPost)
+
+  let result = await db.run(query, params);
+  query = `SELECT * FROM blogs WHERE id = $id`;
+  params = { $id: req.params.id };
+  let editPost = await db.get(query, params);
+  res.json(editPost);
+});
+
+//DELETE from db
+app.delete(prefix + "/blogs/:id", async (req, res) => {
+  let query = `DELETE FROM blogs WHERE id = $id`;
+  let params = {$id: req.params.id};
+  let deletedPost = await db.run(query, params);
+  res.send("Blog has been deleted");
 });
