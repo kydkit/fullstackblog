@@ -26,6 +26,7 @@ const Home = () => {
   if (blogs) {
     blogResult = (
       <div>
+        <button onClick={() => {history.push("/createBlog")}}>make more blogs</button>
         {blogs.map((blog, i) => (
           <div key={i} className="blog" onClick={() => {history.push(`/blog/${blog.id}`)}}>
             <h2>{blog.author}</h2>

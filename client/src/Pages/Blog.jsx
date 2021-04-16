@@ -5,8 +5,8 @@ const Blog = (props) => {
   const [fetchedBlog, setFetchedBlog] = useState(null);
 
   useEffect(() => {
-    fetchBlogById(id); 
-  }, []); 
+    fetchBlogById(id);
+  }, []);
 
   const fetchBlogById = async (id) => {
     let blog = await fetch(`/server/v1/blogs/${id}`);

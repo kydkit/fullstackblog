@@ -13,9 +13,9 @@ function App() {
         <Link to="/about">About</Link>
         <Switch>
           <Route exact path="/" component={Home} />
-          {/* <Route exact path="/createblog" component={CreatePost} /> */}
           <Route exact path="/blog/:id" component={Blog} />
           <Route exact path="/about" component={About} />
+          <Route exact path="/createBlog" component={CreatePost} />
         </Switch>
       </BrowserRouter>
     </div>
