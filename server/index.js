@@ -5,10 +5,6 @@ const blogRoutes = require("./routes/blogRoutes");
 //Server setup
 const app = express();
 
-//DB setup
-const DB = require("./DB");
-const db = new DB();
-
 app.listen(3001, (err) => {
   if (err) {
     console.error("The server could not start");

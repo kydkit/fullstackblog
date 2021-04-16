@@ -3,7 +3,17 @@ const DB = require("../DB");
 const db = new DB();
 
 const getAllBlogs = async (req, res) => {
-  let query = /*sql*/ `SELECT * FROM blogs`;
+  //modified with req.query of specificity
+  let query = "" 
+  if(req.query.author){
+    query = /*sql*/`SELECT * FROM blogs WHERE author = $author`;
+    let params = { $author: req.query.author};
+    let blogByAuthor = await db.all(query, params); 
+    res.json(blogByAuthor); 
+    return;
+  }
+
+  query = /*sql*/ `SELECT * FROM blogs`;
   //.all takes everything from the databsase
   let blogs = await db.all(query);
   res.json(blogs);
