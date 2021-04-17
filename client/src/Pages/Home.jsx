@@ -22,6 +22,16 @@ const Home = () => {
     }
   };
 
+  //MAKE DELETE FUNCTION!!!!!!!!
+  const handleDelete = async () => {
+    await fetch("/server/v1/blogs", {
+      method: "DELETE",//DELETE for delete, Put for updates
+      headers: {
+        "Content-Type": "application/json" //used by POST PUT DELETE methods
+      }
+  });
+}
+
   let blogResult = "";
   if (blogs) {
     blogResult = (
@@ -29,6 +39,7 @@ const Home = () => {
         <button onClick={() => {history.push("/createBlog")}}>make more blogs</button>
         {blogs.map((blog, i) => (
           <div key={i} className="blog" onClick={() => {history.push(`/blog/${blog.id}`)}}>
+            <p onClick={handleDelete}>delete me</p>
             <h2>{blog.author}</h2>
             <em>{blog.created}</em>
             <h3>{blog.title}</h3>
