@@ -1,59 +1,111 @@
-import { useState } from 'react'; 
-import { useHistory } from 'react-router-dom'; 
+import { useState, useContext, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 
-const CreatePost = () => {
-  const history = useHistory(); 
-  const [author, setAuthor] = useState(""); 
+import { PostContext } from "../context/PostsProvider";
+
+const CreatePost = (props) => {
+  const history = useHistory();
+  const {
+    createNewPost,
+    getPostById,
+    singlePost,
+    setSinglePost,
+    editPostById,
+  } = useContext(PostContext);
+  const [author, setAuthor] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [created, setCreated] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault(); 
-    // let timestamp = new Date().toLocaleDateString();
-    // setCreated(timestamp);
-    // console.log(created);
+  useEffect(() => {
+    if (props.match.params.id) {
+      getPostById(props.match.params.id);
+    }
+
+    // This function will run when the component is destroyed.
+    //it resets the forms when going to a different page
+    return () => {
+      setSinglePost(null);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (singlePost && props.match.params.id) {
+      setTitle(singlePost.title);
+      setContent(singlePost.content);
+      setAuthor(singlePost.author);
+    }
+  }, [singlePost]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     let newBlog = {
       author,
       title,
       content,
-      created
-    }; 
-    console.log(newBlog);
-    createBlog(newBlog); 
-  }
-  
-  // A different way of getting the e.target.value of content, see in jsx
-  // const handleContent = (e) => {
-  //   setContent(e.target.value); 
-  // }
+      created,
+    };
 
-  
+    if (props.match.params.id) {
+      // newBlog.id = props.match.params.id;
+      let result = await editPostById(newBlog);
 
-  const createBlog = async (newBlog) => {
-    await fetch("/server/v1/blogs", {
-      method: "POST",//DELETE for delete, Put for updates
-      headers: {
-        "Content-Type": "application/json", //used by POST PUT DELETE methods
-      },
-      body: JSON.stringify(newBlog)//converts JS object or value into JSON string
-    })
-    history.push("/")
-  }
+      if (result.success) {
+        console.log("edit is succcessful");
+        history.push("/");
+      }
+    } else {
+      let result = await createNewPost(newBlog);
+      console.log(result);
+      if (result.success) {
+        console.log("creating new blog");
+        history.push("/");
+      }
+    }
+  };
+
+  //onChange can also be written like this
+  // const handleAuthor = (e) => {
+  //   setAuthor(e.target.value);
+  // };
 
   return (
     <div className="createPost">
-      <h1>Create post page</h1>
+      <h1>{props.match.params.id ? "Edit your blog" : "Create a blog"}</h1>
       <form onSubmit={handleSubmit}>
         <label>Author: </label>
-        <input type="text" placeholder="author" onChange={(e) => {setAuthor(e.target.value)}} />
+        <input
+          type="text"
+          placeholder="author"
+          value={author}
+          onChange={(e) => {
+            setAuthor(e.target.value);
+          }}
+        />
         <label>Title: </label>
-        <input type="text" placeholder="title" onChange={(e) => {setTitle(e.target.value)}} />
+        <input
+          type="text"
+          placeholder="title"
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value);
+          }}
+        />
         <label>Blog: </label>
-        <input type="text" placeholder="content" onChange={(e) => {setContent(e.target.value)}} />
+        <textarea
+          type="text"
+          placeholder="content"
+          value={content}
+          onChange={(e) => {
+            setContent(e.target.value);
+          }}
+        />
         {/* <label>Created: </label>
         <input type="text" placeholder="created" onChange={(e) => {setCreated(e.target.value)}} /> */}
-        <button type="submit">Post my blog</button>
+        <button type="submit">
+          {props.match.params.id ? "Edit Blog" : "Create Blog"}
+        </button>
       </form>
     </div>
   );

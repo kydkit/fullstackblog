@@ -1,61 +1,45 @@
-import { useEffect, useState } from "react";
-import { useHistory } from 'react-router-dom'
+import { useContext } from "react";
+import { useHistory } from 'react-router-dom'
+import { PostContext } from "../context/PostsProvider";
 
 const Home = () => {
+  const { posts, deletePostById} = useContext(PostContext); 
   const history = useHistory(); 
-  const [blogs, setBlogs] = useState([]);
-  //allows the page to runs the function immediately when the page rerenders
-  useEffect(() => {
-    fetchAllBlogs();
-  }, []);
 
-  //By using fetch we can make requests to the server
-  const fetchAllBlogs = async () => {
-    //setting up the api request. fetch already comes with js
-    let blogsToGet = await fetch("/server/v1/blogs");
-    //This method makes the information available to us
-    blogsToGet = await blogsToGet.json();
-    if (blogsToGet.length === 0) {
-      console.log("something went wrong");
-    } else {
-      setBlogs(blogsToGet);
-    }
-  };
+  const handleClick = (id) => {
+    history.push(`/blog/${id}`); 
+  }
 
-  //MAKE DELETE FUNCTION!!!!!!!!
-  const handleDelete = async () => {
-    await fetch("/server/v1/blogs", {
-      method: "DELETE",//DELETE for delete, Put for updates
-      headers: {
-        "Content-Type": "application/json" //used by POST PUT DELETE methods
-      }
-  });
-}
+  const handleDelete = (e, id) => {
+    e.stopPropagation(); 
+    deletePostById(id); 
+  }
 
-  let blogResult = "";
-  if (blogs) {
-    blogResult = (
-      <div>
-        <button onClick={() => {history.push("/createBlog")}}>make more blogs</button>
-        {blogs.map((blog, i) => (
-          <div key={i} className="blog" onClick={() => {history.push(`/blog/${blog.id}`)}}>
-            <p onClick={handleDelete}>delete me</p>
-            <h2>{blog.author}</h2>
-            <em>{blog.created}</em>
-            <h3>{blog.title}</h3>
-            <p>{blog.content}</p>
-          </div>
-        ))}
+  const renderPosts = () => {
+    return posts.map((post) => (
+      <div className="card" key={post.id} onClick={() => handleClick(post.id)}>
+        <div className="title">
+          <h2>{post.title}</h2>
+          <p>{post.author}</p>
+          {/* if date is provided from backend use below */}
+          {/* <em>{post.created}</em> */}
+          {/* if date is provided from frontend use below */}
+          <em>{new Date(post.created).toLocaleDateString()}</em>
+        </div>
+        <div className="content">
+          <p>{post.content}</p>
+          {/* <p>{post.content.slice(0, 20)}</p> */} 
+          <button onClick={(e) => handleDelete(e, post.id)}>Delete Blog</button>
+        </div>
       </div>
-    );
-  } else {
-    blogResult = <p>There are no blogs available</p>;
+    ))
   }
 
   return (
     <div className="home">
       <h1>HELLO here are the blogs</h1>
-      {blogResult}
+      
+      {posts && renderPosts()}
     </div>
   );
 };

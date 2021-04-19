@@ -1,29 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useContext } from "react";
+import { useHistory } from "react-router-dom"; 
+
+import { PostContext } from "../context/PostsProvider"; 
 
 const Blog = (props) => {
-  const { id } = props.match.params;
-  const [fetchedBlog, setFetchedBlog] = useState(null);
+  const history = useHistory (); 
+  const { getPostById, singlePost } = useContext(PostContext); 
+  const { id } = props.match.params; 
 
   useEffect(() => {
-    fetchBlogById(id);
+    getPostById(id); 
+// eslint-disable-next-line
   }, []);
 
-  const fetchBlogById = async (id) => {
-    let blog = await fetch(`/server/v1/blogs/${id}`);
-    blog = await blog.json();
-    setFetchedBlog(blog);
-  };
+  const handleClick = () => {
+    history.push(`/blog/${id}/edit`); 
+  }
 
   let content = <p>Loading...</p>;
-  if (fetchedBlog) {
+  if (singlePost) {
     content = (
       <div>
-        <h2>{fetchedBlog.author}</h2>
-        <em>{fetchedBlog.created}</em>
-        <p>{fetchedBlog.title}</p>
-        <p>{fetchedBlog.content}</p>
+        <h2>{singlePost.title}</h2>
+        <p>{singlePost.author}</p>
+        <em>{new Date(singlePost.created).toLocaleDateString()}</em>
+        <p>{singlePost.content}</p>
+        <button onClick={handleClick} >Edit blog</button>
       </div>
-    );
+    ); 
   }
 
   return (
